@@ -230,12 +230,32 @@ function showResult(){
   document.getElementById('prog').style.width='100%';
 }
 
-function submitEmail(dim){
-  const val=document.getElementById('email-in').value.trim();
-  if(!val||!val.includes('@'))return;
-  document.getElementById('email-in').disabled=true;
-  document.querySelector('.email-btn').disabled=true;
-  document.getElementById('success-msg').style.display='block';
+async function submitEmail(dim){
+  const val = document.getElementById('email-in').value.trim();
+  if(!val || !val.includes('@')) return;
+
+  const API_KEY = 'evzPK5mPwNC2IqqBdowoJg';   
+  const FORM_ID = '9426485';   
+
+  document.getElementById('email-in').disabled = true;
+  document.querySelector('.email-btn').disabled = true;
+
+  try {
+    await fetch(`https://api.convertkit.com/v3/forms/${FORM_ID}/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: API_KEY,
+        email: val,
+        fields: { stuck_type: dim }
+      })
+    });
+  } catch(e) {
+    console.error('ConvertKit error:', e);
+  }
+
+  document.getElementById('success-msg').style.display = 'block';
+}
 }
 
 function retake(){
