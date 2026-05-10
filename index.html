@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Stuck Diagnosis Quiz</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f7f4;color:#1a1a18;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.wrap{width:100%;max-width:600px}
+.card{background:#fff;border-radius:16px;border:0.5px solid rgba(0,0,0,0.1);padding:2rem;min-height:380px;display:flex;flex-direction:column}
+.prog-bar{height:3px;background:#eee;border-radius:99px;margin-bottom:2rem;overflow:hidden}
+.prog-fill{height:100%;background:#534AB7;border-radius:99px;transition:width 0.4s ease}
+.q-counter{font-size:12px;color:#888;margin-bottom:0.75rem;font-weight:500}
+.q-text{font-size:18px;font-weight:500;line-height:1.5;color:#1a1a18;margin-bottom:1.75rem;flex:none}
+.options{display:flex;flex-direction:column;gap:10px;flex:1}
+.opt{background:#fff;border:0.5px solid rgba(0,0,0,0.15);border-radius:10px;padding:0.85rem 1rem;font-size:14px;color:#1a1a18;cursor:pointer;text-align:left;transition:all 0.15s;line-height:1.4}
+.opt:hover{background:#f4f3fe;border-color:#534AB7;color:#3C3489}
+.opt.selected{background:#EEEDFE;border-color:#534AB7;color:#3C3489;font-weight:500}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem}
+.btn{padding:0.6rem 1.4rem;border-radius:8px;border:0.5px solid rgba(0,0,0,0.15);background:#fff;font-size:14px;cursor:pointer;color:#444;transition:all 0.15s}
+.btn:hover{background:#f4f3fe}
+.btn-next{background:#534AB7;color:#fff;border-color:#534AB7}
+.btn-next:hover{background:#3C3489;border-color:#3C3489}
+.btn:disabled{opacity:0.35;cursor:not-allowed}
+.intro{text-align:center;padding:1rem 0}
+.intro h1{font-size:26px;font-weight:600;margin-bottom:0.75rem;color:#1a1a18}
+.intro p{font-size:15px;color:#666;line-height:1.6;margin-bottom:0.5rem;max-width:440px;margin-left:auto;margin-right:auto}
+.intro .tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:1.25rem 0 1.75rem}
+.tag{font-size:12px;padding:4px 12px;border-radius:99px;border:0.5px solid rgba(0,0,0,0.12);color:#666}
+.start-btn{background:#534AB7;color:#fff;border:none;border-radius:10px;padding:0.85rem 2.5rem;font-size:15px;font-weight:500;cursor:pointer;transition:background 0.15s}
+.start-btn:hover{background:#3C3489}
+.result-icon{width:60px;height:60px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:26px}
+.result-type{font-size:22px;font-weight:600;margin-bottom:0.5rem;color:#1a1a18}
+.result-tag{display:inline-block;font-size:12px;padding:3px 12px;border-radius:99px;margin-bottom:1rem;font-weight:500}
+.result-desc{font-size:14px;color:#555;line-height:1.65;margin-bottom:1.5rem}
+.email-gate{background:#f8f7f4;border-radius:12px;padding:1.25rem;border:0.5px solid rgba(0,0,0,0.08)}
+.email-gate p{font-size:13px;color:#555;margin-bottom:0.85rem;line-height:1.5}
+.email-row{display:flex;gap:8px}
+.email-input{flex:1;padding:0.6rem 0.85rem;border-radius:8px;border:0.5px solid rgba(0,0,0,0.15);font-size:14px;outline:none;background:#fff;color:#1a1a18}
+.email-input:focus{border-color:#534AB7;box-shadow:0 0 0 3px rgba(83,74,183,0.1)}
+.email-btn{background:#534AB7;color:#fff;border:none;border-radius:8px;padding:0.6rem 1rem;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.email-btn:hover{background:#3C3489}
+.scores-row{display:flex;flex-direction:column;gap:8px;margin-bottom:1.5rem}
+.score-bar-wrap{display:flex;align-items:center;gap:10px}
+.score-label{font-size:12px;color:#666;width:80px;flex-shrink:0}
+.score-track{flex:1;height:6px;background:#eee;border-radius:99px;overflow:hidden}
+.score-fill{height:100%;border-radius:99px;transition:width 0.6s ease}
+.score-val{font-size:12px;color:#888;width:28px;text-align:right;flex-shrink:0}
+.retake{background:none;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;padding:0.5rem 1rem;font-size:13px;cursor:pointer;color:#666;margin-top:0.75rem}
+.retake:hover{background:#f4f3fe}
+.success-msg{font-size:13px;color:#0F6E56;background:#E1F5EE;border-radius:8px;padding:0.65rem 0.85rem;margin-top:0.75rem;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card" id="card">
+  <div id="intro-screen" class="intro">
+    <div style="font-size:36px;margin-bottom:1rem">🔍</div>
+    <h1>Why are you stuck?</h1>
+    <p>Answer 20 honest questions and find out exactly what's holding you back — and what to do next.</p>
+    <div class="tags">
+      <span class="tag">5 minutes</span>
+      <span class="tag">20 questions</span>
+      <span class="tag">Free results</span>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">Start the diagnosis</button>
+  </div>
+
+  <div id="quiz-screen" style="display:none;flex-direction:column;flex:1">
+    <div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+    <div class="q-counter" id="q-counter">Question 1 of 20</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="nav">
+      <button class="btn" id="btn-back" onclick="goBack()">Back</button>
+      <button class="btn btn-next" id="btn-next" onclick="goNext()" disabled>Next</button>
+    </div>
+  </div>
+
+  <div id="result-screen" style="display:none"></div>
+</div>
+</div>
+
+<script>
+const TYPES = {
+  clarity:{label:"The Unclear One",color:"#534AB7",bg:"#EEEDFE",desc:"You're stuck because you don't yet have a clear enough picture of what you actually want. You have energy and willingness — but no defined target. Without clarity, all effort feels scattered and pointless. The fix isn't trying harder. It's slowing down to figure out exactly where you're trying to go."},
+  fear:{label:"The Fearful One",color:"#993C1D",bg:"#FAECE7",desc:"You know what you want — but something stops you from going after it. Fear of failure, fear of judgment, fear of getting it wrong. You've probably been ready for longer than you think. The barrier isn't ability. It's the story you're telling yourself about what might go wrong."},
+  energy:{label:"The Depleted One",color:"#0F6E56",bg:"#E1F5EE",desc:"You have the vision and even the plan — but you're running on empty. Burnout, poor recovery, or an overloaded life has left you with nothing in the tank. Pushing harder won't work here. You need to restore before you can move forward."},
+  strategy:{label:"The Lost One",color:"#854F0B",bg:"#FAEEDA",desc:"You want to move forward but you don't have a clear plan. You know the destination but not the route. Without a solid system or strategy, you end up going in circles. The good news: this is the most fixable type of stuck — the right framework changes everything."},
+  environment:{label:"The Misplaced One",color:"#185FA5",bg:"#E6F1FB",desc:"Your surroundings are working against you. Wrong people, wrong space, wrong habits in your daily life. You might do well in the right conditions but your current environment constantly pulls you back. You can't out-discipline a broken environment — you have to change it."},
+  identity:{label:"The Doubter",color:"#72243E",bg:"#FBEAF0",desc:"Deep down, you don't fully believe you're the kind of person who can achieve this. The block isn't external — it's a self-concept mismatch. You take one step forward and self-sabotage pulls you back. The work here is internal: rebuilding the story of who you are."}
+};
+
+const Qs = [
+  {q:"When you think about what you want in life right now, how clear does it feel?",dim:"clarity",opts:["Completely clear — I know exactly what I want","I have a rough idea but the details are fuzzy","I know something needs to change but I'm not sure what","I genuinely have no idea what I want"]},
+  {q:"You have a free afternoon to work on a personal goal. What usually happens?",dim:"strategy",opts:["I get to work — I have a system and I follow it","I start but drift between different tasks","I sit down, feel overwhelmed, and don't do much","I avoid it entirely and do something easier"]},
+  {q:"How often do you feel physically or mentally exhausted by the end of the week?",dim:"energy",opts:["Rarely — I manage my energy well","Sometimes — it depends on the week","Most weeks I'm running on fumes","I'm exhausted almost all the time"]},
+  {q:"When you imagine going after a big goal and it not working out, what do you feel?",dim:"fear",opts:["Neutral — failure is part of learning","Mildly uncomfortable but manageable","Anxious — I really don't want to fail","Terrified — I'd rather not try than fail publicly"]},
+  {q:"Look at the people you spend the most time with. Do they support your growth?",dim:"environment",opts:["Yes — they inspire and challenge me","Some do, some don't","Not really — they're comfortable with the status quo","No — they actively discourage change"]},
+  {q:"When you achieve something good, what's your inner reaction?",dim:"identity",opts:["Pride — I worked for this and I deserve it","Pleased but I quickly move on","Surprised — I didn't really expect it to go well","Disbelief — I feel like I got lucky or it won't last"]},
+  {q:"How would you describe your daily routine and structure?",dim:"strategy",opts:["Clear and consistent — I know what I'm doing each day","Somewhat structured but inconsistent","Quite chaotic — each day is very different","No real routine — I just react to whatever comes up"]},
+  {q:"How often do you start things and not finish them?",dim:"clarity",opts:["Rarely — I see things through","Sometimes — when I lose interest or direction","Often — I start with energy but fade out","Almost always — I struggle to follow through on anything"]},
+  {q:"How is your sleep, exercise, and overall physical wellbeing right now?",dim:"energy",opts:["Good — I take care of myself","Okay — could be better","Not great — I neglect these things when busy","Poor — I'm running myself into the ground"]},
+  {q:"If you had a great idea tomorrow, what would stop you from acting on it?",dim:"fear",opts:["Nothing — I'd just start","Uncertainty about the right approach","Worry about what others might think","Fear that it would fail or that I'm not good enough"]},
+  {q:"How does your physical space (home, desk, environment) affect your focus?",dim:"environment",opts:["It helps me — I've set it up for focus","It's neutral — doesn't help or hinder much","It distracts me — it's cluttered or noisy","It actively kills my motivation"]},
+  {q:"Finish this sentence honestly: 'People like me...'",dim:"identity",opts:["...can achieve whatever they set their mind to","...do well when we put in the work","...have to work harder than others to get there","...aren't really cut out for big success"]},
+  {q:"When you think about your main goal right now, how specific is it?",dim:"clarity",opts:["Very specific — I know exactly what I'm aiming for","Fairly clear but missing some details","Vague — more of a feeling than a target","I don't really have a main goal right now"]},
+  {q:"How do you feel when it's time to take an important action toward your goal?",dim:"fear",opts:["Ready — I just do it","A little nervous but I do it anyway","I hesitate and often delay","I find reasons to avoid it altogether"]},
+  {q:"How often do you feel like you have enough time and energy to work on what matters?",dim:"energy",opts:["Often — I protect my time well","Sometimes — when things align","Rarely — I'm always stretched thin","Never — I'm overwhelmed by other demands"]},
+  {q:"If your plan isn't working, how do you usually respond?",dim:"strategy",opts:["Adjust the plan and keep going","Pause to figure out what went wrong","Feel stuck and unsure what to change","Give up or wait for motivation to return"]},
+  {q:"How much does your social circle reflect the life you want to live?",dim:"environment",opts:["A lot — they're living it or building toward it","Somewhat — some do, others don't","Not much — we're quite different in ambition","Not at all — it can feel lonely going this direction"]},
+  {q:"When you succeed at something, how long before self-doubt creeps back in?",dim:"identity",opts:["It doesn't much — I feel stable in myself","A few days or weeks later","Almost immediately","I doubt myself even while succeeding"]},
+  {q:"How clear is your next step — the very next thing you need to do to move forward?",dim:"strategy",opts:["Crystal clear — I know exactly what to do","I have an idea but it's a bit fuzzy","I know roughly what area but not the specific step","I have no idea where to start"]},
+  {q:"Finally — how long have you felt stuck in this area?",dim:"clarity",opts:["Less than a month — it's quite recent","A few months","Around a year","More than a year — possibly much longer"]}
+];
+
+const scores={clarity:0,fear:0,energy:0,strategy:0,environment:0,identity:0};
+const answers=new Array(20).fill(null);
+let current=0;
+
+const dimWeights=[
+  [3,2,1,0],[3,2,1,0],[3,2,1,0],[3,2,1,0],
+  [3,2,1,0],[3,2,1,0],[3,2,1,0],[3,2,1,0],
+  [3,2,1,0],[3,2,1,0],[3,2,1,0],[3,2,1,0],
+  [3,2,1,0],[3,2,1,0],[3,2,1,0],[3,2,1,0],
+  [3,2,1,0],[3,2,1,0],[3,2,1,0],[2,1,1,0]
+];
+
+function startQuiz(){
+  document.getElementById('intro-screen').style.display='none';
+  const qs=document.getElementById('quiz-screen');
+  qs.style.display='flex';
+  renderQ();
+}
+
+function renderQ(){
+  const q=Qs[current];
+  document.getElementById('prog').style.width=((current/20)*100)+'%';
+  document.getElementById('q-counter').textContent='Question '+(current+1)+' of 20';
+  document.getElementById('q-text').textContent=q.q;
+  const opts=document.getElementById('options');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(answers[current]===i?' selected':'');
+    b.textContent=o;
+    b.onclick=()=>select(i);
+    opts.appendChild(b);
+  });
+  document.getElementById('btn-back').disabled=current===0;
+  document.getElementById('btn-next').disabled=answers[current]===null;
+  document.getElementById('btn-next').textContent=current===19?'See my results':'Next';
+}
+
+function select(i){
+  answers[current]=i;
+  document.querySelectorAll('.opt').forEach((b,idx)=>{
+    b.classList.toggle('selected',idx===i);
+  });
+  document.getElementById('btn-next').disabled=false;
+}
+
+function goNext(){
+  if(answers[current]===null)return;
+  if(current===19){showResult();return;}
+  current++;
+  renderQ();
+}
+
+function goBack(){
+  if(current===0)return;
+  current--;
+  renderQ();
+}
+
+function calcScores(){
+  Object.keys(scores).forEach(k=>scores[k]=0);
+  Qs.forEach((q,i)=>{
+    if(answers[i]!==null){
+      scores[q.dim]+=dimWeights[i][answers[i]];
+    }
+  });
+}
+
+function showResult(){
+  calcScores();
+  const maxDim=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+  const t=TYPES[maxDim];
+  const maxScore=9;
+  document.getElementById('quiz-screen').style.display='none';
+  const rs=document.getElementById('result-screen');
+  rs.style.display='block';
+
+  const barsHTML=Object.entries(scores).map(([k,v])=>{
+    const pct=Math.round((v/maxScore)*100);
+    const tc=TYPES[k];
+    return `<div class="score-bar-wrap">
+      <span class="score-label" style="font-size:11px">${tc.label.split(' ')[1]}</span>
+      <div class="score-track"><div class="score-fill" style="width:${pct}%;background:${tc.color}"></div></div>
+      <span class="score-val">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  rs.innerHTML=`
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="result-icon" style="background:${t.bg}">
+        ${maxDim==='clarity'?'🔍':maxDim==='fear'?'😨':maxDim==='energy'?'⚡':maxDim==='strategy'?'🗺':maxDim==='environment'?'🌍':'🧠'}
+      </div>
+      <div class="result-type">${t.label}</div>
+      <span class="result-tag" style="background:${t.bg};color:${t.color}">${maxDim.charAt(0).toUpperCase()+maxDim.slice(1)} block</span>
+      <p class="result-desc">${t.desc}</p>
+    </div>
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:12px;font-weight:500;color:#888;margin-bottom:10px">Your full profile</div>
+      <div class="scores-row">${barsHTML}</div>
+    </div>
+    <div class="email-gate">
+      <p><strong style="font-size:13px;color:#1a1a18">Want your personalised action plan?</strong><br>Enter your email and we'll send you 5 specific steps to break through your ${maxDim} block — free.</p>
+      <div class="email-row">
+        <input class="email-input" type="email" id="email-in" placeholder="your@email.com">
+        <button class="email-btn" onclick="submitEmail('${maxDim}')">Send my plan</button>
+      </div>
+      <div class="success-msg" id="success-msg">Done! Check your inbox — your action plan is on its way.</div>
+    </div>
+    <div style="text-align:center;margin-top:1rem">
+      <button class="retake" onclick="retake()">Retake the quiz</button>
+    </div>
+  `;
+  document.getElementById('prog').style.width='100%';
+}
+
+function submitEmail(dim){
+  const val=document.getElementById('email-in').value.trim();
+  if(!val||!val.includes('@'))return;
+  document.getElementById('email-in').disabled=true;
+  document.querySelector('.email-btn').disabled=true;
+  document.getElementById('success-msg').style.display='block';
+}
+
+function retake(){
+  Object.keys(scores).forEach(k=>scores[k]=0);
+  answers.fill(null);
+  current=0;
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('result-screen').innerHTML='';
+  document.getElementById('quiz-screen').style.display='flex';
+  renderQ();
+}
+</script>
+</body>
+</html>
