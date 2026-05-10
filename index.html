@@ -237,13 +237,13 @@ async function submitEmail(dim) {
   const API_KEY = 'evzPK5mPwNC2IqqBdowoJg'; 
 
   const FORM_IDS = {
-  clarity:     '9426485',
-  fear:        '9426607',
-  energy:      '9426591',
-  strategy:    '9426594',
-  environment: '9426599',
-  identity:    '9426603'
-};
+    clarity:     '9426485',
+    fear:        '9426607',
+    energy:      '9426591',
+    strategy:    '9426594',
+    environment: '9426599',
+    identity:    '9426603'
+  };
 
   const formId = FORM_IDS[dim];
 
@@ -251,14 +251,12 @@ async function submitEmail(dim) {
   document.querySelector('.email-btn').disabled = true;
 
   try {
-    await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
+    await fetch(`https://api.convertkit.com/v3/forms/${formId}/subscribe`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Kit-Api-Key': API_KEY
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email_address: val,
+        api_key: API_KEY,
+        email: val,
         fields: { stuck_type: dim }
       })
     });
