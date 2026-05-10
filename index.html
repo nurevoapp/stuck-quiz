@@ -234,7 +234,7 @@ async function submitEmail(dim) {
   const val = document.getElementById('email-in').value.trim();
   if (!val || !val.includes('@')) return;
 
-  const API_KEY = 'evzPK5mPwNC2IqqBdowoJg';
+  const API_KEY = 'evzPK5mPwNC2IqqBdowoJg'; 
 
   const FORM_IDS = {
     clarity:     '9426485',
@@ -251,17 +251,19 @@ async function submitEmail(dim) {
   document.querySelector('.email-btn').disabled = true;
 
   try {
-    await fetch(`https://api.convertkit.com/v3/forms/${formId}/subscribe`, {
+    await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Kit-Api-Key': API_KEY
+      },
       body: JSON.stringify({
-        api_key: API_KEY,
-        email: val,
+        email_address: val,
         fields: { stuck_type: dim }
       })
     });
   } catch(e) {
-    console.error('ConvertKit error:', e);
+    console.error('Kit API error:', e);
   }
 
   document.getElementById('success-msg').style.display = 'block';
